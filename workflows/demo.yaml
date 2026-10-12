@@ -1,0 +1,58 @@
+name: demo
+description: >-
+  Four-node demo workflow: plan the request, retrieve grounding evidence,
+  analyze with tools, then verify the draft answer.
+start: plan
+max_iterations: 50
+nodes:
+  - id: plan
+    capability: plan
+    description: Decompose the request into an ordered plan.
+    agent: planner
+    models: [fake-model, fake-model-alt]
+    retry:
+      max_attempts: 2
+      backoff_base_s: 0.01
+      backoff_max_s: 0.1
+      jitter: 0.1
+    on_failure: escalate
+    next: [retrieve]
+
+  - id: retrieve
+    capability: retrieve
+    description: Retrieve grounding chunks from the pgvector document store.
+    agent: retriever
+    params:
+      k: 5
+    retry:
+      max_attempts: 2
+      backoff_base_s: 0.01
+      backoff_max_s: 0.1
+    on_failure: fail
+    next: [analyze]
+
+  - id: analyze
+    capability: analyze
+    description: Analyze with the tool registry and draft a grounded answer.
+    agent: analyst
+    models: [fake-model, fake-model-alt]
+    retry:
+      max_attempts: 3
+      backoff_base_s: 0.01
+      backoff_max_s: 0.1
+      jitter: 0.1
+    on_failure: escalate
+    next: [verify]
+
+  - id: verify
+    capability: verify
+    description: Verify the draft against retrieved evidence.
+    agent: verifier
+    retry:
+      max_attempts: 2
+      backoff_base_s: 0.01
+    on_failure: escalate
+    conditional:
+      pass: end
+      revise: analyze
+      fail: end

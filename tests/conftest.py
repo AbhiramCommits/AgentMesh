@@ -50,6 +50,9 @@ async def database() -> None:
             text("TRUNCATE " + ", ".join(TABLES) + " RESTART IDENTITY CASCADE")
         )
     yield
+    from agentmesh.db import dispose_engine
+
+    await dispose_engine()
 
 
 @pytest.fixture
