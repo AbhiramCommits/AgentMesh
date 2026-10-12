@@ -45,10 +45,12 @@ def _runtime() -> Runtime:
     )
 
 
-async def _create_run(request: str = "Which categories drive open tickets?") -> uuid.UUID:
+async def _create_run(
+    request: str = "Which categories drive open tickets?", workflow: str = "demo"
+) -> uuid.UUID:
     async with session_scope() as session:
         run = Run(
-            workflow_name="demo",
+            workflow_name=workflow,
             status=RunStatus.PENDING.value,
             input={"request": request},
             attempt_budget=3,
@@ -151,6 +153,35 @@ async def test_resume_from_scratch_is_noop_when_complete(database: None) -> None
     before = await count_steps(run_id)
     await resume_run(run_id, runtime=_runtime())
     assert await count_steps(run_id) == before
+
+
+@pytest.mark.integration
+async def test_six_node_revise_workflow_runs(database: None) -> None:
+    run_id = await _create_run(
+        request="Summarize open ticket load", workflow="field_ops_revise"
+    )
+    state = await execute_run(run_id, runtime=_runtime())
+
+    assert state["current_node"] is None
+    assert await _run_status(run_id) == RunStatus.COMPLETED.value
+
+    async with session_scope() as session:
+        per_node = dict(
+            (
+                await session.execute(
+                    select(Step.node_id, func.count())
+                    .where(Step.run_id == run_id)
+                    .group_by(Step.node_id)
+                )
+            ).all()
+        )
+    # The verify node requests exactly one revision, so analyze and verify run twice.
+    assert per_node["analyze"] == 2
+    assert per_node["verify"] == 2
+    assert per_node["plan"] == 1
+    assert per_node["retrieve"] == 1
+    assert per_node["polish"] == 1
+    assert per_node["report"] == 1
 
 
 async def test_supervisor_skips_unhealthy_agent() -> None:

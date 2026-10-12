@@ -6,6 +6,7 @@ from agentmesh.agents.analyst import AnalystAgent
 from agentmesh.agents.base import Agent, RunContext, StepResult, extract_json
 from agentmesh.agents.planner import PlannerAgent
 from agentmesh.agents.retrieval_agent import RetrievalAgent
+from agentmesh.agents.summarizer import SummarizerAgent
 from agentmesh.agents.verifier import VerifierAgent
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "RetrievalAgent",
     "RunContext",
     "StepResult",
+    "SummarizerAgent",
     "VerifierAgent",
     "extract_json",
 ]

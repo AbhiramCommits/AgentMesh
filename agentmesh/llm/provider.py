@@ -121,6 +121,13 @@ class FakeModelProvider:
                 reasons = ["Answer is supported by the retrieved chunks."]
             return self._respond(json.dumps({"verdict": verdict, "reasons": reasons}))
 
+        if "[SUMMARIZE]" in blob:
+            sources = _after(blob, "SOURCES:", "none")
+            return self._respond(
+                "Executive summary: open tickets concentrate in a few categories; "
+                f"grounded in sources: {sources}."
+            )
+
         return self._respond(f"ack: {blob[:60]}")
 
 

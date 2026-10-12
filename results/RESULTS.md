@@ -1,6 +1,6 @@
 # AgentMesh Benchmark Results
 
-_Generated 2026-10-12T17:31:14.292047+00:00._
+_Generated 2026-10-12T17:33:33.046548+00:00._
 
 ## Environment
 
@@ -15,9 +15,9 @@ _Generated 2026-10-12T17:31:14.292047+00:00._
 
 | Concurrency | Runs | Wall (s) | Runs/sec | p50 (ms) | p95 (ms) | p99 (ms) | DB commits |
 |---|---|---|---|---|---|---|---|
-| 1 | 200 | 7.255 | 27.57 | 31.95 | 46.83 | 60.4 | 4000 |
-| 8 | 200 | 2.944 | 67.94 | 109.84 | 140.82 | 156.33 | 4000 |
-| 32 | 200 | 2.681 | 74.59 | 399.21 | 475.03 | 487.43 | 4000 |
+| 1 | 200 | 6.538 | 30.59 | 30.01 | 40.24 | 44.59 | 4000 |
+| 8 | 200 | 2.738 | 73.05 | 99.75 | 123.75 | 138.6 | 4000 |
+| 32 | 200 | 3.058 | 65.41 | 423.58 | 659.21 | 680.13 | 4000 |
 
 ## 2. Crash Recovery
 
@@ -34,8 +34,8 @@ _Generated 2026-10-12T17:31:14.292047+00:00._
 | Injected rate | Runs | Completion | Escalation | Retries | Fallbacks | Compensations |
 |---|---|---|---|---|---|---|
 | 0.0 | 60 | 1.0 | 0.0 | 0 | 0 | 0 |
-| 0.1 | 60 | 0.8333 | 0.1667 | 31 | 4 | 24 |
-| 0.3 | 60 | 0.6167 | 0.3833 | 56 | 10 | 39 |
+| 0.1 | 60 | 0.8 | 0.2 | 35 | 9 | 30 |
+| 0.3 | 60 | 0.6667 | 0.3333 | 53 | 14 | 36 |
 
 ## 4. Retrieval
 
@@ -45,7 +45,7 @@ _Generated 2026-10-12T17:31:14.292047+00:00._
 | Recall@1 | 0.96875 |
 | Recall@5 | 1.0 |
 | MRR | 0.984375 |
-| Mean search latency (ms) | 1.256 |
+| Mean search latency (ms) | 1.248 |
 
 ## 5. Health-Based Routing
 
@@ -59,6 +59,6 @@ _Generated 2026-10-12T17:31:14.292047+00:00._
 
 | Metric | Value |
 |---|---|
-| Tests passed | 49 |
+| Tests passed | 50 |
 | Tests skipped | 0 |
-| Coverage (agentmesh, excl. api) | 90.0% |
+| Coverage (agentmesh, excl. api) | 90.3% |

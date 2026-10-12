@@ -12,6 +12,7 @@ from agentmesh.agents.analyst import AnalystAgent
 from agentmesh.agents.base import Agent
 from agentmesh.agents.planner import PlannerAgent
 from agentmesh.agents.retrieval_agent import RetrievalAgent
+from agentmesh.agents.summarizer import SummarizerAgent
 from agentmesh.agents.verifier import VerifierAgent
 
 
@@ -53,6 +54,7 @@ def build_default_agent_registry() -> AgentRegistry:
     registry.register(RetrievalAgent())
     registry.register(AnalystAgent())
     registry.register(VerifierAgent())
+    registry.register(SummarizerAgent())
     return registry
 
 

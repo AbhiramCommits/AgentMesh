@@ -5,7 +5,7 @@
     "processor": "arm",
     "python": "3.11.14",
     "cpu_count": 8,
-    "timestamp": "2026-10-12T17:31:14.292047+00:00"
+    "timestamp": "2026-10-12T17:33:33.046548+00:00"
   },
   "postgres_version": "PostgreSQL 16.15 (Debian 16.15-1.pgdg12+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
   "config": {
@@ -18,31 +18,31 @@
     {
       "concurrency": 1,
       "runs": 200,
-      "wall_clock_s": 7.255,
-      "runs_per_sec": 27.57,
-      "p50_latency_ms": 31.95,
-      "p95_latency_ms": 46.83,
-      "p99_latency_ms": 60.4,
+      "wall_clock_s": 6.538,
+      "runs_per_sec": 30.59,
+      "p50_latency_ms": 30.01,
+      "p95_latency_ms": 40.24,
+      "p99_latency_ms": 44.59,
       "db_commits": 4000
     },
     {
       "concurrency": 8,
       "runs": 200,
-      "wall_clock_s": 2.944,
-      "runs_per_sec": 67.94,
-      "p50_latency_ms": 109.84,
-      "p95_latency_ms": 140.82,
-      "p99_latency_ms": 156.33,
+      "wall_clock_s": 2.738,
+      "runs_per_sec": 73.05,
+      "p50_latency_ms": 99.75,
+      "p95_latency_ms": 123.75,
+      "p99_latency_ms": 138.6,
       "db_commits": 4000
     },
     {
       "concurrency": 32,
       "runs": 200,
-      "wall_clock_s": 2.681,
-      "runs_per_sec": 74.59,
-      "p50_latency_ms": 399.21,
-      "p95_latency_ms": 475.03,
-      "p99_latency_ms": 487.43,
+      "wall_clock_s": 3.058,
+      "runs_per_sec": 65.41,
+      "p50_latency_ms": 423.58,
+      "p95_latency_ms": 659.21,
+      "p99_latency_ms": 680.13,
       "db_commits": 4000
     }
   ],
@@ -66,20 +66,20 @@
     {
       "injected_failure_rate": 0.1,
       "runs": 60,
-      "completion_rate": 0.8333,
-      "escalation_rate": 0.1667,
-      "retries": 31,
-      "fallbacks": 4,
-      "compensations": 24
+      "completion_rate": 0.8,
+      "escalation_rate": 0.2,
+      "retries": 35,
+      "fallbacks": 9,
+      "compensations": 30
     },
     {
       "injected_failure_rate": 0.3,
       "runs": 60,
-      "completion_rate": 0.6167,
-      "escalation_rate": 0.3833,
-      "retries": 56,
-      "fallbacks": 10,
-      "compensations": 39
+      "completion_rate": 0.6667,
+      "escalation_rate": 0.3333,
+      "retries": 53,
+      "fallbacks": 14,
+      "compensations": 36
     }
   ],
   "retrieval": {
@@ -88,7 +88,7 @@
     "recall_at_1": 0.96875,
     "recall_at_k": 1.0,
     "mrr": 0.984375,
-    "mean_latency_ms": 1.2561744715640089,
+    "mean_latency_ms": 1.248450469574891,
     "recall_at_1_k1": 0.96875
   },
   "routing": {
@@ -98,8 +98,8 @@
     "fraction_routed_away": 1.0
   },
   "tests": {
-    "tests_passed": 49,
+    "tests_passed": 50,
     "tests_skipped": 0,
-    "coverage_pct": 90.0
+    "coverage_pct": 90.3
   }
 }

@@ -1,0 +1,77 @@
+name: field_ops_revise
+description: >-
+  Six-node variant with a conditional revise loop: plan, retrieve, analyze,
+  verify (revise -> analyze), polish, then summarize.
+start: plan
+max_iterations: 20
+nodes:
+  - id: plan
+    capability: plan
+    description: Decompose the request into an ordered plan.
+    agent: planner
+    models: [fake-model, fake-model-alt]
+    retry:
+      max_attempts: 2
+      backoff_base_s: 0.01
+      backoff_max_s: 0.1
+    on_failure: escalate
+    next: [retrieve]
+
+  - id: retrieve
+    capability: retrieve
+    description: Retrieve grounding chunks from the pgvector document store.
+    agent: retriever
+    params:
+      k: 5
+    retry:
+      max_attempts: 2
+      backoff_base_s: 0.01
+    on_failure: fail
+    next: [analyze]
+
+  - id: analyze
+    capability: analyze
+    description: Analyze with tools and draft a grounded answer.
+    agent: analyst
+    models: [fake-model, fake-model-alt]
+    retry:
+      max_attempts: 3
+      backoff_base_s: 0.01
+      backoff_max_s: 0.1
+    on_failure: escalate
+    next: [verify]
+
+  - id: verify
+    capability: verify
+    description: Verify the draft; request one revision, then accept.
+    agent: verifier
+    params:
+      revise_once: true
+    retry:
+      max_attempts: 2
+      backoff_base_s: 0.01
+    on_failure: escalate
+    conditional:
+      pass: polish
+      revise: analyze
+      fail: polish
+
+  - id: polish
+    capability: analyze
+    description: Tighten the revised answer before summarization.
+    agent: analyst
+    models: [fake-model, fake-model-alt]
+    retry:
+      max_attempts: 2
+      backoff_base_s: 0.01
+    on_failure: fail
+    next: [report]
+
+  - id: report
+    capability: summarize
+    description: Produce the executive summary from the verified answer.
+    agent: summarizer
+    retry:
+      max_attempts: 2
+      backoff_base_s: 0.01
+    on_failure: fail
