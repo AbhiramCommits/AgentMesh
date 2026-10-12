@@ -97,13 +97,21 @@ async def execute_run(
     crash_at_node: str | None = None,
     runtime: Runtime | None = None,
     executed_counter: list[int] | None = None,
+    start_node: str | None = None,
 ) -> dict[str, Any]:
-    """Execute a run from scratch (or continue if checkpoints already exist)."""
+    """Execute a run from scratch (or continue if checkpoints already exist).
+
+    ``start_node`` overrides the graph start, which powers replay-from-node.
+    """
 
     runtime = runtime or Runtime.build()
     graph, state, run = await _prepare(run_id, runtime)
     if not state:
         state = st.fresh_state(graph, run.input)
+    if start_node:
+        if not graph.has(start_node):
+            raise ValueError(f"unknown start node '{start_node}'")
+        state["current_node"] = start_node
 
     if run.status in {RunStatus.COMPLETED.value, RunStatus.AWAITING_HUMAN.value}:
         return state

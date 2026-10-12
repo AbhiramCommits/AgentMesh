@@ -53,6 +53,9 @@ exclude = ["web", ".venv", "node_modules"]
 select = ["E", "F", "I", "UP", "B", "W"]
 ignore = ["E501"]
 
+[tool.ruff.lint.per-file-ignores]
+"agentmesh/api/*.py" = ["B008"]
+
 [tool.mypy]
 python_version = "3.11"
 plugins = []
