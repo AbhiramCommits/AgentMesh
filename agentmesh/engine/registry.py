@@ -157,20 +157,32 @@ class HealthTracker:
     def all(self) -> list[AgentHealth]:
         return list(self._state.values())
 
-    def is_healthy(self, name: str, now: float | None = None) -> bool:
+    def is_stale(self, name: str, now: float | None = None) -> bool:
+        entry = self._state.get(name)
+        if entry is None:
+            return False
+        now = now if now is not None else time.time()
+        return bool(entry.last_heartbeat) and now - entry.last_heartbeat > self.stale_after_s
+
+    def meets_quality(self, name: str) -> bool:
         entry = self._state.get(name)
         if entry is None:
             return True
-        now = now if now is not None else time.time()
-        if entry.last_heartbeat and now - entry.last_heartbeat > self.stale_after_s:
-            return False
-        if entry.total >= self.min_samples and entry.success_rate < self.min_success_rate:
-            return False
-        return True
+        if entry.total < self.min_samples:
+            return True
+        return entry.success_rate >= self.min_success_rate
+
+    def is_healthy(self, name: str, now: float | None = None) -> bool:
+        return not self.is_stale(name, now) and self.meets_quality(name)
 
 
 class Supervisor:
-    """Selects the healthiest agent that advertises a capability."""
+    """Selects the healthiest agent that advertises a capability.
+
+    Stale agents are never chosen. Agents whose rolling success rate is below
+    the threshold are skipped when a healthier candidate exists, but are still
+    used as a last resort so retries can make progress.
+    """
 
     def __init__(self, registry: AgentRegistry, health: HealthTracker) -> None:
         self.registry = registry
@@ -187,12 +199,16 @@ class Supervisor:
         candidates = [
             a
             for a in self.registry.for_capability(capability)
-            if a.name not in exclude and self.health.is_healthy(a.name)
+            if a.name not in exclude and not self.health.is_stale(a.name)
         ]
         if not candidates:
             raise NoHealthyAgent(capability)
+
+        quality = [a for a in candidates if self.health.meets_quality(a.name)]
+        pool = quality or candidates
+
         if preferred is not None:
-            for agent in candidates:
+            for agent in pool:
                 if agent.name == preferred:
                     await self.health.heartbeat(agent.name, agent.capabilities)
                     return agent
@@ -203,6 +219,6 @@ class Supervisor:
                 return (-1.0, 0.0, agent.name)
             return (-health.success_rate, health.p95_latency_ms, agent.name)
 
-        chosen = sorted(candidates, key=score)[0]
+        chosen = sorted(pool, key=score)[0]
         await self.health.heartbeat(chosen.name, chosen.capabilities)
         return chosen

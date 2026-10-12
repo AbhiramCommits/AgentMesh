@@ -16,6 +16,17 @@ from agentmesh.config import get_settings
 
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
 
+STOPWORDS = {
+    "a", "an", "and", "are", "as", "at", "be", "been", "but", "by", "can",
+    "do", "does", "for", "from", "had", "has", "have", "how", "if", "in",
+    "into", "is", "it", "its", "may", "must", "no", "not", "of", "on", "or",
+    "our", "over", "so", "than", "that", "the", "their", "them", "then",
+    "there", "these", "they", "this", "to", "up", "use", "was", "we", "were",
+    "what", "when", "which", "who", "will", "with", "within", "you", "your",
+    "all", "any", "each", "more", "most", "other", "some", "such", "only",
+    "own", "same", "too", "very", "just", "also", "per",
+}
+
 
 class EmbeddingProvider(Protocol):
     """Interface for embedding backends."""
@@ -30,24 +41,46 @@ def tokenize(text: str) -> list[str]:
     return _TOKEN_RE.findall(text.lower())
 
 
+def _tokenize_content(text: str) -> list[str]:
+    return [t for t in tokenize(text) if t not in STOPWORDS and len(t) > 1]
+
+
 class FakeEmbedder:
-    """Deterministic 256-dim feature-hashing embedder."""
+    """Deterministic feature-hashing embedder (words + bigrams + char trigrams).
+
+    Stopwords are dropped, word bigrams and character trigrams are weighted, and
+    the result is L2-normalized. This gives a stable lexical similarity signal,
+    so pgvector retrieval quality is measurable offline with no API key.
+    """
+
+    BIGRAM_WEIGHT = 2.0
+    CHARGRAM_WEIGHT = 1.0
 
     def __init__(self, dim: int = 256) -> None:
         self.dim = dim
 
     def embed_one(self, text: str) -> list[float]:
         vec = [0.0] * self.dim
-        tokens = tokenize(text)
-        features = list(tokens) + [f"{a}_{b}" for a, b in zip(tokens, tokens[1:], strict=False)]
+        tokens = _tokenize_content(text)
+        features: dict[str, float] = {}
+        for token in tokens:
+            features[f"w:{token}"] = features.get(f"w:{token}", 0.0) + 1.0
+        for a, b in zip(tokens, tokens[1:], strict=False):
+            key = f"b:{a}_{b}"
+            features[key] = features.get(key, 0.0) + self.BIGRAM_WEIGHT
+        for token in tokens:
+            padded = f"^{token}$"
+            for i in range(len(padded) - 2):
+                key = f"c:{padded[i : i + 3]}"
+                features[key] = features.get(key, 0.0) + self.CHARGRAM_WEIGHT
         if not features:
             vec[0] = 1.0
             return vec
-        for feature in features:
+        for feature, weight in features.items():
             digest = int(hashlib.sha1(feature.encode("utf-8")).hexdigest(), 16)
             index = digest % self.dim
             sign = 1.0 if (digest // self.dim) % 2 == 0 else -1.0
-            vec[index] += sign
+            vec[index] += sign * math.sqrt(weight)
         norm = math.sqrt(sum(v * v for v in vec)) or 1.0
         return [v / norm for v in vec]
 
