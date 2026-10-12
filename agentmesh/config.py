@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO", alias="AGENTMESH_LOG_LEVEL")
     crash_at_node: str = Field(default="", alias="AGENTMESH_CRASH_AT_NODE")
     max_concurrency: int = Field(default=8, alias="AGENTMESH_MAX_CONCURRENCY")
+    db_pool_size: int = Field(default=10, alias="AGENTMESH_DB_POOL_SIZE")
+    db_max_overflow: int = Field(default=20, alias="AGENTMESH_DB_MAX_OVERFLOW")
 
     # API
     api_host: str = Field(default="0.0.0.0", alias="AGENTMESH_API_HOST")

@@ -20,6 +20,14 @@ class Base(DeclarativeBase):
     """Declarative base for all AgentMesh ORM models."""
 
 
+# Lightweight transaction counter used by the benchmark harness.
+COMMITS: dict[str, int] = {"count": 0}
+
+
+def reset_commit_counter() -> None:
+    COMMITS["count"] = 0
+
+
 _engine: AsyncEngine | None = None
 _session_factory: async_sessionmaker[AsyncSession] | None = None
 
@@ -34,8 +42,8 @@ def get_engine() -> AsyncEngine:
             settings.database_url,
             echo=False,
             pool_pre_ping=True,
-            pool_size=10,
-            max_overflow=20,
+            pool_size=settings.db_pool_size,
+            max_overflow=settings.db_max_overflow,
         )
     return _engine
 
@@ -60,6 +68,7 @@ async def session_scope() -> AsyncIterator[AsyncSession]:
         try:
             yield session
             await session.commit()
+            COMMITS["count"] += 1
         except Exception:
             await session.rollback()
             raise
@@ -73,6 +82,7 @@ async def get_session() -> AsyncIterator[AsyncSession]:
         try:
             yield session
             await session.commit()
+            COMMITS["count"] += 1
         except Exception:
             await session.rollback()
             raise

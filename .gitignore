@@ -30,6 +30,10 @@ yarn-error.log*
 
 # Results temp
 results/*.tmp
+results/coverage.json
+results/junit.xml
+coverage.xml
+web/tsconfig.tsbuildinfo
 
 # OS / editor
 .DS_Store

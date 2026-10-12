@@ -1,0 +1,105 @@
+{
+  "environment": {
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.11.14",
+    "cpu_count": 8,
+    "timestamp": "2026-10-12T17:31:14.292047+00:00"
+  },
+  "postgres_version": "PostgreSQL 16.15 (Debian 16.15-1.pgdg12+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+  "config": {
+    "throughput_runs": 200,
+    "recovery_runs": 100,
+    "policy_runs": 60,
+    "quick": false
+  },
+  "throughput": [
+    {
+      "concurrency": 1,
+      "runs": 200,
+      "wall_clock_s": 7.255,
+      "runs_per_sec": 27.57,
+      "p50_latency_ms": 31.95,
+      "p95_latency_ms": 46.83,
+      "p99_latency_ms": 60.4,
+      "db_commits": 4000
+    },
+    {
+      "concurrency": 8,
+      "runs": 200,
+      "wall_clock_s": 2.944,
+      "runs_per_sec": 67.94,
+      "p50_latency_ms": 109.84,
+      "p95_latency_ms": 140.82,
+      "p99_latency_ms": 156.33,
+      "db_commits": 4000
+    },
+    {
+      "concurrency": 32,
+      "runs": 200,
+      "wall_clock_s": 2.681,
+      "runs_per_sec": 74.59,
+      "p50_latency_ms": 399.21,
+      "p95_latency_ms": 475.03,
+      "p99_latency_ms": 487.43,
+      "db_commits": 4000
+    }
+  ],
+  "recovery": {
+    "runs": 100,
+    "resume_success_rate": 1.0,
+    "mean_nodes_reexecuted": 1.0,
+    "max_nodes_reexecuted": 1,
+    "mean_wasted_work_saved_pct": 37.5
+  },
+  "failure_policies": [
+    {
+      "injected_failure_rate": 0.0,
+      "runs": 60,
+      "completion_rate": 1.0,
+      "escalation_rate": 0.0,
+      "retries": 0,
+      "fallbacks": 0,
+      "compensations": 0
+    },
+    {
+      "injected_failure_rate": 0.1,
+      "runs": 60,
+      "completion_rate": 0.8333,
+      "escalation_rate": 0.1667,
+      "retries": 31,
+      "fallbacks": 4,
+      "compensations": 24
+    },
+    {
+      "injected_failure_rate": 0.3,
+      "runs": 60,
+      "completion_rate": 0.6167,
+      "escalation_rate": 0.3833,
+      "retries": 56,
+      "fallbacks": 10,
+      "compensations": 39
+    }
+  ],
+  "retrieval": {
+    "n": 32,
+    "k": 5,
+    "recall_at_1": 0.96875,
+    "recall_at_k": 1.0,
+    "mrr": 0.984375,
+    "mean_latency_ms": 1.2561744715640089,
+    "recall_at_1_k1": 0.96875
+  },
+  "routing": {
+    "runs_before_marking": 20,
+    "runs_after_marking": 20,
+    "plan_steps_after_marking": 20,
+    "fraction_routed_away": 1.0
+  },
+  "tests": {
+    "tests_passed": 49,
+    "tests_skipped": 0,
+    "coverage_pct": 90.0
+  }
+}

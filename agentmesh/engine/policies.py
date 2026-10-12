@@ -26,6 +26,19 @@ from agentmesh.models import (
 )
 from agentmesh.tools.base import ToolContext
 
+# Process-wide counters for the benchmark harness and diagnostics.
+METRICS: dict[str, int] = {
+    "compensations": 0,
+    "escalations": 0,
+    "retries": 0,
+    "fallbacks": 0,
+}
+
+
+def reset_metrics() -> None:
+    for key in METRICS:
+        METRICS[key] = 0
+
 
 class NodeFailed(RuntimeError):
     """Raised when a node exhausts its recovery budget and is configured to fail."""
@@ -107,6 +120,8 @@ async def execute_node_with_recovery(
 
     for attempt in range(1, max_attempts + 1):
         model = models[min(attempt - 1, len(models) - 1)]
+        if attempt > 1:
+            METRICS["retries"] += 1
         agent: Agent = await runtime.supervisor.select_agent(
             node.capability, preferred=node.agent
         )
@@ -148,6 +163,8 @@ async def execute_node_with_recovery(
 
         await st.finish_step(step_id, agent_name=agent.name, result=result)
         await runtime.health.record(agent.name, ok=True, latency_ms=result.latency_ms)
+        if models and model != models[0]:
+            METRICS["fallbacks"] += 1
         return NodeOutcome(step_id, result, agent.name, attempt)
 
     await compensate_step(run_id, node.id, runtime)
@@ -195,6 +212,7 @@ async def compensate_step(run_id: uuid.UUID, node_id: str, runtime: Runtime) -> 
         ctx = ToolContext(run_id=run_id, step_id=step_id, sandbox_dir=st.sandbox_dir(run_id))
         await runtime.tools.compensate(tool_name, args, result, ctx)
         compensated += 1
+    METRICS["compensations"] += compensated
     return compensated
 
 
@@ -219,6 +237,7 @@ async def escalate_run(
 
     await st.set_status(run_id, RunStatus.AWAITING_HUMAN)
     await _queue_escalation(escalation_id, run_id, node_id, reason)
+    METRICS["escalations"] += 1
     return escalation_id
 
 

@@ -55,6 +55,7 @@ ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "agentmesh/api/*.py" = ["B008"]
+"scripts/benchmark.py" = ["B023"]
 
 [tool.mypy]
 python_version = "3.11"
